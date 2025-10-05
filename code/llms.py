@@ -2,6 +2,8 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
+from langchain_perplexity import ChatPerplexity
+
 
 from dotenv import load_dotenv
 
@@ -13,6 +15,7 @@ available_models = [
     "gemini-1.5-flash",
     "gemini-1.5-pro",
     "llama3-8b-8192",
+    "sonar",
 ]
 
 
@@ -39,3 +42,10 @@ def get_llm(model: str):
             temperature=0.0,
             api_key=os.getenv("GROQ_API_KEY"),
         )
+        
+    elif model == "sonar":
+        return ChatPerplexity(
+            model ="sonar",
+            temperature=0.0,
+            api_key=os.getenv("PPLX_API_KEY"),
+        )    

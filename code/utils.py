@@ -71,7 +71,7 @@ def load_env() -> None:
     load_dotenv(ENV_FPATH, override=True)
 
     # Check if 'XYZ' has been loaded
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("PPLX_API_KEY")
 
     assert api_key, "'api_key' has not been loaded or is not set in the .env file."
 

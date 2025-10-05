@@ -1,5 +1,7 @@
 import os
 import sys
+import subprocess
+import platform
 from pathlib import Path
 from typing import Optional, Dict, Any
 from llms import get_llm
@@ -11,9 +13,16 @@ from utils import load_publication, load_yaml_config, load_env, save_text_to_fil
 from paths import PROMPT_CONFIG_FPATH, OUTPUTS_DIR, APP_CONFIG_FPATH
 from prompt_builder import build_prompt_from_config
 
-
+def open_file(path: str):
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", path])            
+    elif platform.system() == "Linux":
+        subprocess.run(["xdg-open", path])
+        
 def invoke_llm(
-    prompt: str, model: str = "gpt-4o-mini", temperature: float = 0.0
+    prompt: str, model: str = "sonar", temperature: float = 0.0
 ) -> Optional[str]:
     """Calls the LLM with a prompt and returns the response.
 
@@ -65,18 +74,24 @@ def run_prompt_example(
         os.path.join(OUTPUTS_DIR, f"{prompt_config_key}_prompt.md"),
         header=f"Prompt Generated From Config: {prompt_config_key}",
     )
-
+    
     # Get LLM response
     llm_response = invoke_llm(prompt, model=model_name)
     if llm_response:
+        llm_response_file = os.path.join(OUTPUTS_DIR, f"{prompt_config_key}_llm_response.md")
         save_text_to_file(
             llm_response,
-            os.path.join(OUTPUTS_DIR, f"{prompt_config_key}_llm_response.md"),
+            llm_response_file,
             header=f"LLM Response for Prompt: {prompt_config_key}",
         )
+        
+        if os.path.exists(llm_response_file):
+            print(f"✓ LLM response saved to: {llm_response_file}")
+            open_file(llm_response_file)
+            
     else:
         print("✗ LLM response was empty or failed.")
-
+        
 
 def main(prompt_config_key: str) -> None:
     """Main entry point to run a modular prompt example using configuration.
@@ -98,7 +113,7 @@ def main(prompt_config_key: str) -> None:
 
         print("Loading application configuration...")
         app_config = load_yaml_config(APP_CONFIG_FPATH)
-        model_name = app_config.get("llm", "gpt-4o-mini")
+        model_name = app_config.get("llm", "sonar")
         print(f"✓ Model set to: {model_name}")
 
         # Load the prompt configuration
@@ -132,6 +147,6 @@ if __name__ == "__main__":
 
     # Define the prompt configuration key to use
     # You can change this to any key defined in your `prompt_config.yaml` file.
-    prompt_cfg_key = "summarization_prompt_cfg5"
+    prompt_cfg_key = "summarization_prompt_cfg2"
 
     main(prompt_config_key=prompt_cfg_key)
