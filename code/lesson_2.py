@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 from paths import OUTPUTS_DIR, APP_CONFIG_FPATH
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -20,8 +22,15 @@ class Entities(BaseModel):
         description="The entities mentioned in the publication"
     )
 
+def open_file(path: str):
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", path])
+    elif platform.system() == "Linux":
+        subprocess.run(["xdg-open", path])
 
-def no_structured_output(model: str = "gpt-4o-mini"):
+def no_structured_output(model: str = "sonar"):
     """
     This function demonstrates how to use the LLM without a structured output.
     """
@@ -46,15 +55,20 @@ def no_structured_output(model: str = "gpt-4o-mini"):
 # Response:
 {response.content}
     """
-
+    file_path = os.path.join(OUTPUTS_DIR, f"no_structured_output_llm_response.md")
     save_text_to_file(
         saved_text,
         os.path.join(OUTPUTS_DIR, f"no_structured_output_llm_response.md"),
         header=f"LLM Response Without Structured Output",
     )
 
+    if os.path.exists(file_path):
+        print(f"LLM response saved to: {file_path}")
+        open_file(file_path)
+    else:
+        print("LLM response was empty or failed.")
 
-def with_prompting_to_structure_output(model: str = "gpt-4o-mini"):
+def with_prompting_to_structure_output(model: str = "sonar"):
     """
     This function demonstrates how to use the LLM with prompting to structure the output.
     """
@@ -95,7 +109,7 @@ def with_prompting_to_structure_output(model: str = "gpt-4o-mini"):
 # Response:
 {response.content}
     """
-
+    file_path = os.path.join(OUTPUTS_DIR, f"with_prompting_to_structure_output_llm_response.md")
     save_text_to_file(
         saved_text,
         os.path.join(
@@ -104,8 +118,14 @@ def with_prompting_to_structure_output(model: str = "gpt-4o-mini"):
         header=f"LLM Response With Prompting to Structure Output",
     )
 
+    if os.path.exists(file_path):
+        print(f"LLM response saved to: {file_path}")
+        open_file(file_path)
+    else:
+        print("LLM response was empty or failed.")    
 
-def with_output_parser(model: str = "gpt-4o-mini"):
+
+def with_output_parser(model: str = "sonar"):
     """
     This function demonstrates how to use the LLM with prompting to structure the output.
     """
@@ -144,15 +164,21 @@ def with_output_parser(model: str = "gpt-4o-mini"):
     # After Parsing:
     {parsed_response}
     """
-
+    file_path = os.path.join(OUTPUTS_DIR, f"with_output_parser_llm_response.md")
     save_text_to_file(
         saved_text,
         os.path.join(OUTPUTS_DIR, f"with_output_parser_llm_response.md"),
         header=f"With Output Parser",
     )
 
+    if os.path.exists(file_path):
+        print(f"LLM response saved to: {file_path}")
+        open_file(file_path)
+    else:
+        print("LLM response was empty or failed.")
 
-def model_native_structured_output(model: str = "gpt-4o-mini"):
+
+def model_native_structured_output(model: str = "sonar"):
     publication_content = load_publication()
 
     prompt = """
@@ -173,12 +199,18 @@ def model_native_structured_output(model: str = "gpt-4o-mini"):
     # Response:
     {str(response.model_dump())}
     """
-
+    file_path = os.path.join(OUTPUTS_DIR, f"model_native_structured_output_llm_response.md")
     save_text_to_file(
         saved_text,
         os.path.join(OUTPUTS_DIR, f"model_native_structured_output_llm_response.md"),
         header=f"LLM Response With Model Native Structured Output",
     )
+
+    if os.path.exists(file_path):
+        print(f"LLM response saved to: {file_path}")
+        open_file(file_path)
+    else:
+        print("LLM response was empty or failed.")
 
 
 if __name__ == "__main__":
